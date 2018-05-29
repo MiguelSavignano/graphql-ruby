@@ -19,7 +19,7 @@ module GraphQL
       # @return [Symbol]
       attr_reader :method
 
-      def initialize(name, return_type_expr = nil, desc = nil, null: nil, field: nil, function: nil, description: nil, deprecation_reason: nil, method: nil, connection: nil, max_page_size: nil, resolve: nil, introspection: false, extras: [], &definition_block)
+      def initialize(name, return_type_expr = nil, desc = nil, null: nil, field: nil, camelize: true, function: nil, description: nil, deprecation_reason: nil, method: nil, connection: nil, max_page_size: nil, resolve: nil, introspection: false, extras: [], &definition_block)
         if !(field || function)
           if return_type_expr.nil?
             raise ArgumentError, "missing positional argument `type`"
@@ -48,6 +48,7 @@ module GraphQL
         @introspection = introspection
         @extras = extras
         @arguments = {}
+        @camelize = camelize
 
         if definition_block
           instance_eval(&definition_block)
@@ -80,7 +81,7 @@ module GraphQL
           GraphQL::Field.new
         end
 
-        field_defn.name = Member::BuildType.camelize(name)
+        field_defn.name = @camelize ? Member::BuildType.camelize(name) : name
         if @return_type_expr
           return_type_name = Member::BuildType.to_type_name(@return_type_expr)
           connection = @connection.nil? ? return_type_name.end_with?("Connection") : @connection

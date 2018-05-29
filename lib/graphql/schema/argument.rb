@@ -8,17 +8,18 @@ module GraphQL
 
       attr_reader :name
 
-      def initialize(arg_name, type_expr, desc = nil, required:, default_value: NO_DEFAULT)
+      def initialize(arg_name, type_expr, desc = nil, required:, camelize: true, default_value: NO_DEFAULT)
         @name = arg_name.to_s
         @type_expr = type_expr
         @description = desc
         @null = !required
         @default_value = default_value
+        @camelize = camelize
       end
 
       def to_graphql
         argument = GraphQL::Argument.new
-        argument.name = Member::BuildType.camelize(@name)
+        argument.name = @camelize ? Member::BuildType.camelize(name) : name
         argument.type = -> {
           Member::BuildType.parse_type(@type_expr, null: @null)
         }
